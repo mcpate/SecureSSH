@@ -1,0 +1,21 @@
+---
+- name: Create SSH user
+  user: name={{ sshuser }} group=sudo
+
+- name: Create SSH directory
+  file: path=/home/{{ sshuser }}/.ssh state=directory mode=0700
+
+- name: Copy public SSH key
+  copy: src={{ sshkey }} dest=/home/{{ sshuser }}/.ssh/authorized_keys mode=0600
+
+- name: Enable public key authentication
+  lineinfile: dest=/etc/ssh/sshd_config line='PubkeyAuthentication yes'
+
+- name: Disable password authentication
+  lineinfile: dest=/etc/ssh/sshd_config line='PasswordAuthentication no'
+
+- name: Disable challenge response authentication
+  lineinfile: dest=/etc/ssh/sshd_config line='ChallengeResponseAuthentication no'
+
+- name: Restart SSH daemon
+  systemd: name=sshd state=reloaded
